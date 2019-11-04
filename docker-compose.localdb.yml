@@ -3,7 +3,7 @@ version: "3.7"
 services:
   ckan-dev:
     container_name: ckan
-    image: ckancontainerreg.azurecr.io/dev/ckan:2.8.3.latest
+    image: ckan:2.8
     logging:
       driver: "json-file"
       options:
@@ -32,7 +32,7 @@ services:
       - TEST_CKAN_SQLALCHEMY_URL=postgres://ckan:${POSTGRES_PASSWORD}@db/ckan_test
       - TEST_CKAN_DATASTORE_WRITE_URL=postgresql://ckan:${POSTGRES_PASSWORD}@db/datastore_test
       - TEST_CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:${DS_RO_PASS}@db/datastore_test
-   links:
+    links:
       - db
       - solr
       - redis
@@ -53,32 +53,60 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
 
-  datapusher:
+#  datapusher:
+#    container_name: datapusher
+#    image: ckancontainerreg.azurecr.io/dev/datapusher:latest
+#    logging:
+#      driver: "json-file"
+#      options:
+#         max-size: "150K"
+#         max-file: "10"
+#    ports:
+#      - "8800:8800"
+#    restart: always
+ datapusher:
     container_name: datapusher
-    image: ckancontainerreg.azurecr.io/dev/datapusher:latest
-    logging:
-      driver: "json-file"
-      options:
-         max-size: "150K"
-         max-file: "10"
+    build:
+      context: datapusher/
     ports:
       - "8800:8800"
     restart: always
 
-  solr:
-    container_name: solr
-    image: ckancontainerreg.azurecr.io/dev/solr:latest
-    logging:
-      driver: "json-file"
-      options:
-         max-size: "150K"
-         max-file: "10"
+  datapusher:
+    container_name: datapusher
+    build:
+      context: datapusher/
     ports:
-      - "8983:8983"
-    volumes:
-      - solr_data:/opt/solr/server/solr/ckan/data/index
+      - "8800:8800"
     restart: always
 
+ # solr:
+ #   container_name: solr
+ #   image: ckancontainerreg.azurecr.io/dev/solr:latest
+ #   logging:
+ #     driver: "json-file"
+ #     options:
+ #        max-size: "150K"
+ #        max-file: "10"
+ #   ports:
+ #     - "8983:8983"
+ #   volumes:
+ #     - solr_data:/opt/solr/server/solr/ckan/data/index
+ #   restart: always
+
+#  solr:
+#    container_name: solr
+ #   build:
+  #    context: solr/
+   # ports:
+    #  - "8983:8983"
+    #volumes:
+    #  - solr_data:/opt/solr/server/solr/ckan/data/index
+   # restart: always
+  solr:
+    container_name: solr
+    build:
+      context: solr/
   redis:
     container_name: redis
     image: redis:alpine
@@ -96,3 +124,4 @@ volumes:
   ckan_etc:
   solr_data:
   ckan_home:
+               
